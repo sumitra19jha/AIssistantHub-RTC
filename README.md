@@ -31,6 +31,7 @@ npm start
 3. Access the frontend application in your browser at http://localhost:3001 (or the appropriate port).
 
 ## Project Structure
+```
 .
 ├── nodejs-server
     ├── src
@@ -49,5 +50,31 @@ npm start
     |   |__ app.js
     ├── package.json
     └── server.js
+```
 
+### Infrastructure
+```
++---------+    +---------+       +------------+       +-------+
+|         |    |         |       |            |       |       |
+|  User   +--->+ Frontend+------>+  Flask API  +------>+ OpenAI|
+|         |    |         |       |            |       |       |
++----+----+    +----+----+       +------------+       +-------+
+     |               |
+     |               |
+     +---------------+
+             |
+             v
+      +------+-------+
+      |              |
+      | Node.js Server|
+      |              |
+      +------+-------+
+             |
+             v
+       +-----+-----+
+       |           |
+       |   MySQL   |
+       |           |
+       +-----------+
 
+```
