@@ -7,8 +7,6 @@ This project enables real-time communication between users and the OpenAI GPT mo
 - [Installation](#installation)
 - [Usage](#usage)
 - [Project Structure](#project-structure)
-- [Contributing](#contributing)
-- [License](#license)
 
 ## Installation
 
