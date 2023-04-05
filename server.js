@@ -27,7 +27,8 @@ exports.io = socketIO(server, {
 
 
 server.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+    console.log("NODE_APP_INSTANCE", process.env.NODE_APP_INSTANCE);
+    console.log(`Listening on port ${PORT}`);
 });
 
 require("./src/socket/connection");
