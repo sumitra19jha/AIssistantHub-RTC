@@ -4,10 +4,13 @@ const {
 } = require("../constants");
 
 const logger = require("../../logger");
+const {
+  constants
+} = require("fs/promises");
 
 
 exports.createRoom = async (req, res, next) => {
-  console.log("CREATE ROOM CALLED");
+  console.log(req.body);
 
   return res.json({
     success: true,

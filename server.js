@@ -76,12 +76,19 @@ async function getChatGPTResponse(room, prompt, userId, contentId) {
     let chatGPTResponse = "";
 
     try {
+        const room_all_messages = await ChatDao.getChatMessages(contentId);
+        const messagesData = [];
+
+        for (const message of room_all_messages.value) {
+            messagesData.push({
+              role: message.type.toLowerCase() == "ai" ? "assistant": message.type.toLowerCase(),
+              content: message.message,
+            });
+        }
+        
         const chatCompletion = await openai.createChatCompletion({
             model: "gpt-3.5-turbo",
-            messages: [{
-                role: "user",
-                content: prompt
-            }],
+            messages: messagesData,
             stream: true,
         }, {
             responseType: "stream"
