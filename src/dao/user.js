@@ -10,7 +10,7 @@ const UserDao = {
 
             try {
 
-                const sqlQuery = `SELECT * FROM user WHERE user.id = ?`;
+                const sqlQuery = `SELECT * FROM users WHERE users.id = ?`;
 
                 connPool.query(sqlQuery, [userId], (err, result) => {
                     if (err) {

@@ -1,22 +1,24 @@
-const connPool= require("./index").connPool;
+const connPool = require("./index").connPool;
 const logger = require("../../logger");
 const logLevel = require("../constants").logLevel;
 
-class SessionDao {
-    getSessionBySessionId(sessionId) {
+const ChatDao = {
+    saveChatMessage(userId, contentId, type, message) {
         return new Promise(function (resolve, reject) {
-            const successMessage = "Successfully got session data from the database.";
-            const failureMessage =
-                "Error while getting session data from the database.";
+            const successMessage = "Successfully saved chat message to the database.";
+            const failureMessage = "Error while saving chat message to the database.";
 
             try {
+                const sqlQuery = `
+                    INSERT INTO chat (user_id, content_id, type, message)
+                    VALUES (?, ?, ?, ?)
+                `;
 
-                const sqlQuery = "Select * from session where session_id = ?";
-                connPool.query(sqlQuery, [sessionId], (err, result) => {
+                connPool.query(sqlQuery, [userId, contentId, type, message], (err, result) => {
                     if (err) {
                         logger.log(logLevel.error, err, {
-                            dao: "SessionDao",
-                            method: "getSessionBySessionId"
+                            dao: "ChatDao",
+                            method: "saveChatMessage"
                         });
                         reject({
                             success: false,
@@ -35,8 +37,8 @@ class SessionDao {
                 });
             } catch (e) {
                 logger.log(logLevel.error, e, {
-                    dao: "SessionDao",
-                    method: "getSessionBySessionId"
+                    dao: "ChatDao",
+                    method: "saveChatMessage"
                 });
                 reject({
                     success: false,
@@ -46,7 +48,7 @@ class SessionDao {
                 });
             }
         });
-    }
-}
+    },
+};
 
-module.exports = SessionDao;
+module.exports = ChatDao;

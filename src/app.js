@@ -4,7 +4,9 @@ const cors = require('cors');
 const app = express();
 
 // Enable CORS with default settings
-app.use(cors());
+app.use(cors({
+    origin: 'http://localhost:3000'
+  }));
 
 // Body parser to parse url encoded data and json data
 app.use(express.urlencoded({
