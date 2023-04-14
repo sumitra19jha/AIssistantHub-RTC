@@ -25,9 +25,8 @@ const path = require("path");
 
 const logFormat = format.printf(
     (info) =>
-    `\n${info.timestamp} ${info.level} [${info.label}]: ${
-      info.message
-    } \nmetadata: ${JSON.stringify(info.metadata)}`
+        `\n${info.timestamp} ${info.level} [${info.label}]: ${info.message
+        } \nmetadata: ${JSON.stringify(info.metadata)}`
 );
 
 const logger = winston.createLogger({

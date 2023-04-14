@@ -1,145 +1,81 @@
-const http = require('http');
-const socketIo = require('socket.io');
-const PORT = require('./src/config/config').PORT;
-const OPENAI_API_KEY = require('./src/config/config').OPENAI_API_KEY;
-const app = require("./src/app");
-const constants = require("./src/constants");
-const ChatDao = require("./src/dao/chat");
-const auth = require("./src/middleware/auth").customAuth;
-const { Configuration, OpenAIApi } = require("openai");
+try {
+    const http = require('http');
+    const socketIo = require('socket.io');
+    const PORT = require('./src/config/config').PORT;
+    const app = require("./src/app");
+    const constants = require("./src/constants");
+    const ChatDao = require("./src/dao/chat");
+    const auth = require("./src/middleware/auth").customAuth;
+    const { getChatGPTResponse } = require("./src/helpers/gpt.js");
+    const server = http.createServer(app);
 
-
-const configuration = new Configuration({
-    apiKey: OPENAI_API_KEY,
-});
-
-const openai = new OpenAIApi(configuration);
-const server = http.createServer(app);
-
-io = socketIo(server, {
-    cors: {
-        origin: "http://localhost:3000"
-    },
-    handlePreflightRequest: (req, res) => {
-        const headers = {
-            "Access-Control-Allow-Headers": "Content-Type, Authorization",
-            "Access-Control-Allow-Origin": req.headers.origin, //or the specific origin you want to give access to,
-            "Access-Control-Allow-Credentials": true,
-        };
-        res.writeHead(200, headers);
-        res.end();
-    },
-});
-
-io.use(auth);
-
-io.on('connection', (socket) => {
-    socket.on('CHAT_MESSAGE', async (data) => {
-        console.log("CHAT_MESSAGE EVENT CALLED");
-        const {
-            contentId,
-            message
-        } = data;
-
-        const room = constants.rooms.contentRoom(contentId);
-        const userId = socket.user.id;
-
-        try {
-            // Save user message
-            await ChatDao.saveChatMessage(userId, contentId, 'USER', message);
-        } catch (error) {
-            console.error("Error saving user message to the database:", error);
-        }
-
-        // Get response from ChatGPT
-        await getChatGPTResponse(room, message, userId, contentId);
+    global.io = socketIo(server, {
+        cors: {
+            origin: "http://localhost:3000"
+        },
+        handlePreflightRequest: (req, res) => {
+            const headers = {
+                "Access-Control-Allow-Headers": "Content-Type, Authorization",
+                "Access-Control-Allow-Origin": req.headers.origin, //or the specific origin you want to give access to,
+                "Access-Control-Allow-Credentials": true,
+            };
+            res.writeHead(200, headers);
+            res.end();
+        },
     });
 
-    socket.on("JOIN_CONTENT_ROOM", (data) => {
-        console.log("JOIN_CONTENT_ROOM EVENT CALLED");
-        const {
-            contentId
-        } = data;
-        const room = constants.rooms.contentRoom(contentId)
-        socket.join(room, () => {
-            console.log(`User joined room ${room}`);
-        });
-    });
+    io.use(auth);
 
-    socket.on('disconnect', () => {
-        console.log('User disconnected');
-    });
-});
+    io.on('connection', (socket) => {
+        socket.on(constants.CHAT_MESSAGE, async (data) => {
+            console.log("CHAT_MESSAGE EVENT CALLED");
+            const {
+                contentId,
+                message
+            } = data;
 
-// Function to get ChatGPT response
-async function getChatGPTResponse(room, prompt, userId, contentId) {
-    let chatGPTResponse = "";
+            const room = constants.rooms.contentRoom(contentId);
+            const userId = socket.user.id;
 
-    try {
-        const room_all_messages = await ChatDao.getChatMessages(contentId);
-        const messagesData = [];
+            try {
+                // Save user message
+                await ChatDao.saveChatMessage(userId, contentId, 'USER', message);
+            } catch (error) {
+                console.error("Error saving user message to the database:", error);
+            }
 
-        for (const message of room_all_messages.value) {
-            messagesData.push({
-              role: message.type.toLowerCase() == "ai" ? "assistant": message.type.toLowerCase(),
-              content: message.message,
-            });
-        }
-        
-        const chatCompletion = await openai.createChatCompletion({
-            model: "gpt-3.5-turbo",
-            messages: messagesData,
-            stream: true,
-        }, {
-            responseType: "stream"
+            // Get response from ChatGPT
+            await getChatGPTResponse(room, userId, contentId);
         });
 
-        chatCompletion.data.on("data", async (data) => {
-            const lines = data?.toString()?.split("\n").filter((line) => line.trim() !== "");
-            for (const line of lines) {
-                const message = line.replace(/^data: /, "");
+        socket.on(constants.JOIN_CONTENT_ROOM, async (data) => {
+            const { contentId } = data;
 
-                if (message == "[DONE]") {
-                    try {
-                        await ChatDao.saveChatMessage(userId, contentId, "AI", chatGPTResponse);
-                    } catch (error) {
-                        console.error("Error saving ChatGPT response to the database:", error);
-                    }
+            const room = constants.rooms.contentRoom(contentId);
+            const userId = socket.user.id;
+            socket.join(room, () => { console.log(`User joined room ${room}`); });
 
-                    io.to(room).emit("NEW_MESSAGE", {
-                        message: "",
-                        streamEnd: true,
-                    });
-                } else {
-                    let token;
-                    try {
-                        token = JSON.parse(message)?.choices?.[0]?.delta;
-                        if (token.content) {
-                            const messagePart = token.content;
-                            chatGPTResponse += messagePart;
-                            io.to(room).emit("NEW_MESSAGE", {
-                                message: messagePart,
-                            });
-                        }
-                    } catch {
-                        console.error("Error getting response from ChatGPT:", error);
-                        io.to(room).emit("NEW_MESSAGE", {
-                            message: "I'm sorry, I couldn't process your message.",
-                        });
-                    }
+            try {
+                const last_chat = await ChatDao.getLastChatMessage(contentId);
+                if (last_chat.value.type === constants.TYPE_USER_FOR_CHAT_CONSTANT) {
+                    await getChatGPTResponse(room, userId, contentId);
                 }
+            } catch (error) {
+                console.error("Error saving user message to the database:", error);
             }
         });
-    } catch (error) {
-        console.error("Error getting response from ChatGPT:", error);
-        io.to(room).emit("NEW_MESSAGE", {
-            message: "I'm sorry, I couldn't process your message.",
+
+        socket.on(constants.DISCONNECT, () => {
+            console.log('User disconnected');
         });
-    }
+    });
+
+
+    server.listen(PORT, () => {
+        console.log("NODE_APP_INSTANCE", process.env.NODE_APP_INSTANCE);
+        console.log(`Listening on port ${PORT}`);
+    });
+} catch (error) {
+    console.log(error)
 }
 
-
-server.listen(PORT, () => {
-    console.log("NODE_APP_INSTANCE", process.env.NODE_APP_INSTANCE);
-    console.log(`Listening on port ${PORT}`);
-});
