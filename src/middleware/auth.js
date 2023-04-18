@@ -5,8 +5,6 @@ const logger = require("../../logger");
 const logLevel = require("../constants").logLevel;
 
 const auth = async (socket, next) => {
-    console.log("auth middleware");
-
     try {
         const req = socket.request;
         const bearerHeader = req.headers["authorization"];

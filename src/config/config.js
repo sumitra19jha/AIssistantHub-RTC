@@ -8,6 +8,8 @@ const MYSQL_PORT = process.env.MYSQL_PORT;
 const MYSQL_USER = process.env.MYSQL_USER;
 const MYSQL_PASSWORD = process.env.MYSQL_PASSWORD;
 const MYSQL_DATABASE = process.env.MYSQL_DATABASE;
+const BACKEND_API_URL = process.env.BACKEND_API_URL;
+const AUTH_TOKEN = process.env.AUTH_TOKEN;
 
 module.exports = {
   OPENAI_API_KEY,
@@ -17,4 +19,6 @@ module.exports = {
   MYSQL_USER,
   MYSQL_PASSWORD,
   MYSQL_DATABASE,
+  BACKEND_API_URL,
+  AUTH_TOKEN,
 };
