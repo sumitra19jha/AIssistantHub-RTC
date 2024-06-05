@@ -1,38 +1,53 @@
-# Real-time GPT Communication Application
+# AIssistantHub
+Welcome to AIssistantHub! This innovative project facilitates real-time communication between users and the OpenAI GPT model for content generation and refinement. Whether you need a blog post, article, or any written content, simply provide a topic, set the sentiment, and specify the length—AIssistantHub will handle the rest!
 
-This project enables real-time communication between users and the OpenAI GPT model for content generation and refinement. It uses a Flask API for content generation and a Node.js server with Socket.IO for real-time communication and room management.
+**Key Features**
+- **Topic Submission**: Input your desired topic.
+- **Sentiment Control**: Define the tone of your content.
+- **Length Adjustment**: Specify the length of your post or article.
 
-## Table of Contents
+**Major Components**
+- Frontend - [AIssistantHub](https://github.com/sumitra19jha/AIssistantHub)
+- Backend - [AIssistantHub-Backend](https://github.com/sumitra19jha/AIssistantHub-Backend)
+- RTC - [AIssistantHub-RTC](https://github.com/sumitra19jha/AIssistantHub-RTC)
 
+# AIssistant Hub RTC
+
+The RTC component of AIssistantHub enables seamless real-time communication with users, ensuring an interactive and responsive experience.
+
+### Table of Contents
 - [Installation](#installation)
 - [Usage](#usage)
 - [Project Structure](#project-structure)
 
 ## Installation
 
-1. Clone the repository:
+1. **Clone the Repository**:
+    ```bash
+    git clone https://github.com/sumitra19jha/Generative-AI-Content-Creation-RTC.git
+    ```
 
-```bash
-git clone https://github.com/sumitra19jha/Generative-AI-Content-Creation-RTC.git
-```
-2. Install dependencies for the Node.js server:
-```bash
-npm install
-```
-3. Configure your database settings in the .env file.
-4. Set up your OpenAI API key and other required settings in the .env file.
+2. **Install Node.js Server Dependencies**:
+    ```bash
+    npm install
+    ```
+
+3. **Configure Environment Settings**:
+    - Update your database settings in the `.env` file.
+    - Set up your OpenAI API key and other required configurations in the `.env` file.
 
 ## Usage
-1. Start the Flask API server
-2. Start the Node.js server:
-```bash
-npm start
-```
-3. Access the frontend application in your browser at http://localhost:3001 (or the appropriate port).
+1. **First Start the Flask API Server ([AIssistantHub-Backend](https://github.com/sumitra19jha/AIssistantHub-Backend))**
+2. **Start the Node.js Server**:
+    ```bash
+    npm start
+    ```
+
+3. **Access the Application ([AIssistantHub Frontend](https://github.com/sumitra19jha/AIssistantHub))**:
+    - Open your browser and navigate to `http://localhost:3001` (or the appropriate port).
 
 ## Project Structure
-```
-.
+```plaintext
 ├── nodejs-server
     ├── src
     │   ├── config
